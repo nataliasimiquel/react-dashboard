@@ -1,0 +1,49 @@
+variables:
+  ACCESS_KEY_ID: "AKIAIGSAEDYUCI3OZSQA"
+  SECRET_KEY: "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"
+  AWS_STAGING_BUCKET: "texano-dashboard-staging"
+  AWS_PRODUCTION_BUCKET: "texano-dashboard"
+  SERVER_STAGING: "http://ec2-54-207-148-68.sa-east-1.compute.amazonaws.com:8197"
+  SERVER_PRODUCTION: "https://api-admin.coalah.com.br"
+
+deploy_production:
+  stage: deploy
+  environment:
+    name: production
+  image: node:14
+  script:
+    - export REACT_APP_SECRET_API_KEY=$SECRET_KEY
+    - export REACT_APP_ACCESS_KEY_ID=$ACCESS_KEY_ID
+    - export REACT_APP_AWS_BUCKET=$AWS_PRODUCTION_BUCKET
+    - export REACT_APP_SERVER_URL=$SERVER_PRODUCTION
+    - echo "Compiling the code..."
+    - npm install
+    - echo "Dependencies installed"
+    - npm i -g grunt grunt-aws-s3 grunt-exec
+    - echo "Grunt installed"
+    - grunt
+    - echo "Compile complete."
+  only:
+    variables:
+      - ($CI_COMMIT_BRANCH == "master")
+
+deploy_staging:
+  stage: deploy
+  environment:
+    name: staging
+  image: node:14
+  script:
+    - export REACT_APP_SECRET_API_KEY=$SECRET_KEY
+    - export REACT_APP_ACCESS_KEY_ID=$ACCESS_KEY_ID
+    - export REACT_APP_AWS_BUCKET=$AWS_STAGING_BUCKET
+    - export REACT_APP_SERVER_URL=$SERVER_STAGING
+    - echo "Compiling the code..."
+    - npm install
+    - echo "Dependencies installed"
+    - npm i -g grunt grunt-aws-s3 grunt-exec
+    - echo "Grunt installed"
+    - grunt
+    - echo "Compile complete."
+  only:
+    variables:
+      - ($CI_COMMIT_BRANCH == "develop")
